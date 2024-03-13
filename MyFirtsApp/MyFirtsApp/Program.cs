@@ -24,3 +24,20 @@ double average = GetAverage(numbers);
 Console.WriteLine(average);
 
 Console.WriteLine("Modyfikacja testowa");
+
+static int GetMax(int[] nums)
+{
+    
+    int tmp = 0;
+    for (int i = 0; i < nums.Length; i++)
+    {
+        if (nums[i]>nums[tmp])
+        {
+            nums[tmp] = nums[i];
+        }
+    }
+
+    return nums[0];
+}
+int max = GetMax(numbers);
+Console.WriteLine("Max wartość: " + max);
