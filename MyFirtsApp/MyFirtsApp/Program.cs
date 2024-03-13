@@ -7,15 +7,16 @@ Console.WriteLine("Modification 3");
 
 static double GetAverage(int [] numbers)
 {
-    double counter = 0;
+    double count = 0;
     for (int i = 0; i < numbers.Length; i++)
     {
         
-        counter += numbers[i];
+        count += numbers[i];
+        
         
     }
 
-    return counter / numbers.Length;
+    return count / numbers.Length;
 
 }
 
@@ -41,3 +42,4 @@ static int GetMax(int[] nums)
 }
 int max = GetMax(numbers);
 Console.WriteLine("Max wartość: " + max);
+
