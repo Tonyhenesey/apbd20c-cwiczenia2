@@ -1,17 +1,14 @@
-using Cw05.Properties;
-using Cw05.Properties.Database;
-using Cw05.Properties.Endpoints;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
 using Cw05.Properties.Models;
+using Cw05.Properties.Database;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
 // Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddControllers();
-builder.Services.AddSingleton<MockDb>();
+builder.Services.AddSingleton<MockDb>(); // Using a mock database for demonstration
 
 var app = builder.Build();
 
@@ -24,26 +21,31 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Minimal API
-app.MapAnimalEndpoints();
-
-// Controllers
-app.MapControllers();
+// Map animal endpoints
+app.MapGet("/animals", (MockDb db) => Results.Ok(db.Animals));
+app.MapGet("/animals/{id}", (int id, MockDb db) => 
+    db.Animals.FirstOrDefault(a => a.Id == id) is Animal animal ? Results.Ok(animal) : Results.NotFound());
+app.MapPost("/animals", (Animal animal, MockDb db) => 
+{
+    db.Animals.Add(animal);
+    return Results.Created($"/animals/{animal.Id}", animal);
+});
+app.MapPut("/animals/{id}", (int id, Animal updateAnimal, MockDb db) =>
+{
+    var animal = db.Animals.FirstOrDefault(a => a.Id == id);
+    if (animal == null) return Results.NotFound();
+    animal.Name = updateAnimal.Name;
+    animal.Category = updateAnimal.Category;
+    animal.Weight = updateAnimal.Weight;
+    animal.FurColor = updateAnimal.FurColor;
+    return Results.Ok(animal);
+});
+app.MapDelete("/animals/{id}", (int id, MockDb db) =>
+{
+    var animal = db.Animals.FirstOrDefault(a => a.Id == id);
+    if (animal == null) return Results.NotFound();
+    db.Animals.Remove(animal);
+    return Results.NoContent();
+});
 
 app.Run();
-
-// var builder = WebApplication.CreateBuilder(args);
-// var app = builder.Build();
-//
-// var dataService = new DataService();
-//
-// app.MapGet("/animals", () => dataService.GetAllAnimals());
-// app.MapGet("/animals/{id}", (int id) => dataService.GetAnimalById(id));
-// app.MapPost("/animals", (Animal animal) => dataService.AddAnimal(animal));
-// app.MapPut("/animals", (Animal animal) => dataService.UpdateAnimal(animal));
-// app.MapDelete("/animals/{id}", (int id) => dataService.DeleteAnimal(id));
-//
-// app.MapGet("/visits/animal/{animalId}", (int animalId) => dataService.GetVisitsForAnimal(animalId));
-// app.MapPost("/visits", (Visit visit) => dataService.AddVisit(visit));
-//
-// app.Run();
